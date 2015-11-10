@@ -31,25 +31,44 @@ rm(tmp)
 # Inclusion Hashtags keywords
 # Exclude some user
 
-grepl("colin",hashtags) | 
-  grepl("builder",hashtags) | 
-  grepl("epicstrut",hashtags) | 
-  grepl("moneysupermarket",hashtags) |
-  grepl("moneysupermarket",text) |
-  grepl("epicbuilder",text) |
-  
+
 tweetBuilder <- filter(msmTweet,
                        (
-                         
-                         grepl("MoneySuper",text)
-                         
+                         grepl("colin",hashtags) | 
+                         grepl("builder",hashtags) | 
+                         grepl("epicstrut",hashtags) | 
+                         grepl("moneysupermarket",hashtags) |
+                         grepl("moneysupermarket",text) |
+                         grepl("epicbuilder",text) |
+                         grepl("MoneySuper",text)                         
                        ) &
                          !(
-                           grepl("straightouttacompton",hashtags) |
+                           grepl("straightouttacompton",hashtags)  |
                            user.id_str == 93495836 |
-                           user.id_str ==1666083234
+                             user.id_str ==1666083234
                            )                       
-                       )  %>% group_by(CreatedDate) %>% summarise(count = n() )
+                       ) 
+
+listWords = as.data.frame(table(scan(text=tolower(str_replace_all(tweetBuilder$text, "[^[:alnum:]]", " ")),what="character")))
+
+
+
+listWords$Var1 = as.character(listWords$Var1)
+topWords = listWords[listWords$Freq < 600 & listWords$Freq > 5 & nchar(listWords$Var1)>3,]
+colors = c("blue", "red", "orange", "green")
+
+png("out.png",height = 1000, width = 1000)
+wordcloud(words=topWords$Var1, freq = topWords$Freq,colors=colors,random.color = FALSE,scale = c(6,2))
+dev.off()
+
+plot(topWords$Freq,xlab = topWords$Var1)
+
+topUsers <- group_by(tweetBuilder, user.id_str,user.screen_name) %>% summarise(count = n()) %>% ungroup() %>% arrange(desc(count))
+
+
+topUsersTweets <- filter(tweetBuilder, user.id_str %in% unlist(topUsers[topUsers$count > 10,1]))
+
+%>% group_by(CreatedDate) %>% summarise(count = n() )
 
 
 tweetBuilder <- group_by(msmTweet, CreatedDate) %>% 

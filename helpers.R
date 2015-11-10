@@ -87,8 +87,11 @@ json2DataFrame <- function(x){
 }
 
 
-hashFrequency <- function(tweetHashTags){
+hashFrequency <- function(tweetHashTags, split_chr = ","){
   
-  as.data.frame(table(unlist(strsplit(tweetHashTags, ","))))
+  as.data.frame(table(unlist(strsplit(tweetHashTags, split_chr))))
   
 }
+
+paste(scan(url("http://textuploader.com/1k0g/raw"), 
+           what="character"), collapse=" ")
